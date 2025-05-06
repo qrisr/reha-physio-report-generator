@@ -8,10 +8,21 @@ const openRouterService = {
     
     // Default settings
     settings: {
-        apiKey: 'YOUR_OPENROUTER_API_KEY',
+        apiKey: '',
         model: 'openai/gpt-3.5-turbo',
         systemPrompt: 'Du bist ein erfahrener Physiotherapeut, der professionelle Abschlussberichte verfasst. Deine Berichte sind klar strukturiert, fachlich korrekt und verwenden physiotherapeutische Fachsprache.'
     },
+    
+    // Available variables for prompt templates
+    availableVariables: [
+        { name: 'time', description: 'Zeitpunkt der Berichterstellung' },
+        { name: 'goalStatus', description: 'Status des Therapieziels (erreicht/nicht-erreicht)' },
+        { name: 'compliance', description: 'Compliance des Patienten (ja/nein)' },
+        { name: 'therapyGoal', description: 'Das definierte Therapieziel' },
+        { name: 'hypothesis', description: 'Die eingegebene Hypothese' },
+        { name: 'reason', description: 'Begründung bei Nicht-Erreichung des Ziels (nur wenn goalStatus = nicht-erreicht)' },
+        { name: 'formData:json', description: 'Alle Formulardaten als JSON-Objekt' }
+    ],
     
     /**
      * Initialize the service with saved settings if available
@@ -53,10 +64,13 @@ const openRouterService = {
         // Create the prompt for the AI
         const prompt = this.createPrompt(formData);
         
+        // Process system prompt to replace variables
+        const processedSystemPrompt = this.processTemplate(this.settings.systemPrompt, formData);
+        
         try {
-            // For demo purposes, if no API key is provided, return a mock response
-            if (this.settings.apiKey === 'YOUR_OPENROUTER_API_KEY') {
-                console.warn('Using mock response. Replace with actual API key for production.');
+            // Check if API key is provided
+            if (!this.settings.apiKey || this.settings.apiKey.trim() === '') {
+                console.warn('No API key provided. Using mock response.');
                 return this.getMockResponse(formData);
             }
             
@@ -74,7 +88,7 @@ const openRouterService = {
                     messages: [
                         {
                             role: 'system',
-                            content: this.settings.systemPrompt
+                            content: processedSystemPrompt
                         },
                         {
                             role: 'user',
@@ -85,15 +99,54 @@ const openRouterService = {
             });
             
             if (!response.ok) {
-                throw new Error(`API request failed with status ${response.status}`);
+                const errorData = await response.json().catch(() => ({}));
+                const errorMessage = errorData.error?.message || `API request failed with status ${response.status}`;
+                throw new Error(errorMessage);
             }
             
             const data = await response.json();
             return data.choices[0].message.content;
         } catch (error) {
             console.error('Error calling OpenRouter API:', error);
-            throw error;
+            
+            // If API call fails, use mock response as fallback
+            console.warn('API call failed. Using mock response as fallback.');
+            return this.getMockResponse(formData);
         }
+    },
+    
+    /**
+     * Process a template string by replacing variables with their values
+     * @param {string} template - The template string with variables
+     * @param {Object} formData - The form data containing values
+     * @returns {string} - The processed template
+     */
+    processTemplate: function(template, formData) {
+        if (!template) return '';
+        
+        // Replace {formData:json} with stringified JSON
+        let processed = template.replace(/\{formData:json\}/g, JSON.stringify(formData, null, 2));
+        
+        // Replace simple variables
+        processed = processed.replace(/\{(\w+)\}/g, (match, varName) => {
+            if (varName in formData) {
+                return formData[varName];
+            }
+            return match; // Keep the original if variable not found
+        });
+        
+        // Process conditional expressions (simple version)
+        // Format: {varName === 'value' ? 'trueResult' : 'falseResult'}
+        processed = processed.replace(/\{(\w+)\s*===\s*['"]([^'"]+)['"]\s*\?\s*['"]([^'"]+)['"]\s*:\s*['"]([^'"]+)['"]\}/g, 
+            (match, varName, value, trueResult, falseResult) => {
+                if (varName in formData && formData[varName] === value) {
+                    return trueResult;
+                }
+                return falseResult;
+            }
+        );
+        
+        return processed;
     },
     
     /**
@@ -166,5 +219,13 @@ ${goalAchieved ?
 <p>Erstellt am: ${formData.time}<br>
 Physiotherapeut: Dr. med. Anna Therapeut</p>
 `;
+    },
+    
+    /**
+     * Get the list of available variables for templates
+     * @returns {Array} - Array of variable objects with name and description
+     */
+    getAvailableVariables: function() {
+        return this.availableVariables;
     }
 };

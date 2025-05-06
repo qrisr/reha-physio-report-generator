@@ -9,7 +9,7 @@ const adminConfig = {
     password: 'admin123',
     
     // Default system prompt
-    defaultSystemPrompt: 'Du bist ein erfahrener Physiotherapeut, der professionelle Abschlussberichte verfasst. Deine Berichte sind klar strukturiert, fachlich korrekt und verwenden physiotherapeutische Fachsprache.',
+    defaultSystemPrompt: 'Du bist ein erfahrener Physiotherapeut, der professionelle Abschlussberichte verfasst. Deine Berichte sind klar strukturiert, fachlich korrekt und verwenden physiotherapeutische Fachsprache.\n\nAktuelles Therapieziel: {therapyGoal}\nZielerreichung: {goalStatus === "erreicht" ? "Das Ziel wurde erreicht" : "Das Ziel wurde nicht erreicht"}\nCompliance: {compliance === "ja" ? "gut" : "verbesserungswürdig"}',
     
     // Available models
     availableModels: [
@@ -175,8 +175,69 @@ function createAdminModal() {
     systemPromptTextarea.style.padding = '8px';
     systemPromptTextarea.style.boxSizing = 'border-box';
     
+    // Add help text for variables
+    const variablesHelp = document.createElement('div');
+    variablesHelp.style.marginTop = '10px';
+    variablesHelp.style.fontSize = '0.9em';
+    variablesHelp.style.color = '#666';
+    
+    const helpTitle = document.createElement('p');
+    helpTitle.innerHTML = '<strong>Verfügbare Variablen:</strong> (Klicken zum Einfügen)';
+    helpTitle.style.marginBottom = '5px';
+    variablesHelp.appendChild(helpTitle);
+    
+    // Create variable chips
+    if (typeof openRouterService !== 'undefined' && typeof openRouterService.getAvailableVariables === 'function') {
+        const variables = openRouterService.getAvailableVariables();
+        const chipContainer = document.createElement('div');
+        chipContainer.style.display = 'flex';
+        chipContainer.style.flexWrap = 'wrap';
+        chipContainer.style.gap = '5px';
+        
+        variables.forEach(variable => {
+            const chip = document.createElement('span');
+            chip.textContent = `{${variable.name}}`;
+            chip.title = variable.description;
+            chip.style.backgroundColor = '#e9f0f7';
+            chip.style.padding = '3px 8px';
+            chip.style.borderRadius = '12px';
+            chip.style.fontSize = '0.85em';
+            chip.style.cursor = 'pointer';
+            
+            chip.addEventListener('click', () => {
+                // Insert variable at cursor position
+                const cursorPos = systemPromptTextarea.selectionStart;
+                const textBefore = systemPromptTextarea.value.substring(0, cursorPos);
+                const textAfter = systemPromptTextarea.value.substring(cursorPos);
+                systemPromptTextarea.value = textBefore + `{${variable.name}}` + textAfter;
+                
+                // Set cursor position after inserted variable
+                const newCursorPos = cursorPos + variable.name.length + 2;
+                systemPromptTextarea.focus();
+                systemPromptTextarea.setSelectionRange(newCursorPos, newCursorPos);
+            });
+            
+            chipContainer.appendChild(chip);
+        });
+        
+        variablesHelp.appendChild(chipContainer);
+    }
+    
+    // Add example usage
+    const exampleUsage = document.createElement('p');
+    exampleUsage.innerHTML = '<strong>Beispiel:</strong> Du bist ein Physiotherapeut und erstellst einen Bericht für das Ziel: {therapyGoal}';
+    exampleUsage.style.marginTop = '10px';
+    exampleUsage.style.fontSize = '0.85em';
+    variablesHelp.appendChild(exampleUsage);
+    
+    const conditionalExample = document.createElement('p');
+    conditionalExample.innerHTML = '<strong>Bedingte Logik:</strong> {goalStatus === "erreicht" ? "Gratulation zum Erfolg!" : "Weiter arbeiten!"}';
+    conditionalExample.style.fontSize = '0.85em';
+    variablesHelp.appendChild(conditionalExample);
+    
     promptGroup.appendChild(promptLabel);
     promptGroup.appendChild(systemPromptTextarea);
+    promptGroup.appendChild(variablesHelp);
     
     // Model selection
     const modelGroup = document.createElement('div');
