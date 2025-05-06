@@ -108,7 +108,19 @@ document.addEventListener('DOMContentLoaded', () => {
             reportSection.scrollIntoView({ behavior: 'smooth' });
         } catch (error) {
             console.error('Error generating report:', error);
-            alert('Fehler bei der Berichterstellung. Bitte versuchen Sie es erneut.');
+            
+            // Show more detailed error message
+            let errorMessage = 'Fehler bei der Berichterstellung: ';
+            
+            if (error.message && error.message.includes('API key')) {
+                errorMessage += 'API-Schlüssel ungültig oder nicht vorhanden. Bitte überprüfen Sie die API-Einstellungen im Admin-Bereich.';
+            } else if (error.message && error.message.includes('rate limit')) {
+                errorMessage += 'API-Ratenlimit überschritten. Bitte versuchen Sie es später erneut.';
+            } else {
+                errorMessage += 'Bitte versuchen Sie es erneut oder überprüfen Sie die API-Einstellungen.';
+            }
+            
+            alert(errorMessage);
             loader.style.display = 'none';
             reportSection.style.display = 'none';
         }

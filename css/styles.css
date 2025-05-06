@@ -72,6 +72,9 @@ input, select, textarea {
     border-radius: 4px;
     font-family: var(--font-family);
     font-size: 16px;
+    resize: none; /* Prevent resizing of textareas */
+    user-drag: none; /* Prevent dragging */
+    -webkit-user-drag: none;
 }
 
 input:focus, select:focus, textarea:focus {

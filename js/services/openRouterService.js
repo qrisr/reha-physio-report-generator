@@ -74,6 +74,8 @@ const openRouterService = {
                 return this.getMockResponse(formData);
             }
             
+            console.log('Using API key:', this.settings.apiKey.substring(0, 3) + '...');
+            
             // Make the API request
             const response = await fetch(this.apiUrl, {
                 method: 'POST',
