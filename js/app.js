@@ -1,170 +1,170 @@
-/**
- * Physiotherapie Abschlussbericht Application
- * Main application file
- */
+document.addEventListener('DOMContentLoaded', () => {
+    // DOM Elements
+    const currentTimeEl = document.getElementById('current-time');
+    const goalStatusEl = document.getElementById('goal-status');
+    const complianceEl = document.getElementById('compliance');
+    const therapyGoalEl = document.getElementById('therapy-goal');
+    const hypothesisEl = document.getElementById('hypothesis');
+    const reasonGroupEl = document.getElementById('reason-group');
+    const reasonEl = document.getElementById('reason');
+    const generateBtn = document.getElementById('generate-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const reportForm = document.getElementById('report-form');
+    const reportSection = document.getElementById('report-section');
+    const loader = document.getElementById('loader');
+    const reportContainer = document.getElementById('report-container');
+    const summaryContentEl = document.getElementById('summary-content');
+    const reportTextEl = document.getElementById('report-text');
+    
+    const goalStatusIndicator = document.getElementById('goal-status-indicator');
+    const complianceIndicator = document.getElementById('compliance-indicator');
 
-// Initialize Vue application
-new Vue({
-    el: '#app',
+    // Initialize and update time
+    function updateTime() {
+        const now = new Date();
+        const options = { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        };
+        currentTimeEl.value = now.toLocaleString('de-DE', options);
+    }
     
-    // Application data
-    data: {
-        // Current time (updated every minute)
-        currentTime: '',
-        
-        // Form data
-        formData: {
-            goalStatus: '',
-            compliance: '',
-            goalText: '',
-            hypothesisText: '',
-            reasonText: ''
-        },
-        
-        // Application state
-        isSubmitting: false,
-        error: null,
-        report: null,
-        
-        // Timer reference for time updates
-        timeInterval: null
-    },
-    
-    // Lifecycle hooks
-    created() {
-        // Initialize the current time
-        this.updateTime();
-        
-        // Update time every minute
-        this.timeInterval = setInterval(this.updateTime, 60000);
-    },
-    
-    beforeDestroy() {
-        // Clear the time interval when the component is destroyed
-        if (this.timeInterval) {
-            clearInterval(this.timeInterval);
-        }
-    },
-    
-    // Methods
-    methods: {
-        /**
-         * Update the current time
-         */
-        updateTime() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            this.currentTime = `${hours}:${minutes}`;
-            
-            // Also update the time in the form data
-            this.formData.time = this.currentTime;
-        },
-        
-        /**
-         * Handle goal status change
-         * Shows/hides the reason field based on goal status
-         */
-        handleGoalStatusChange() {
-            // If goal is not achieved, ensure the reason field is empty
-            if (this.formData.goalStatus !== 'not-achieved') {
-                this.formData.reasonText = '';
-            }
-        },
-        
-        /**
-         * Reset the form to its initial state
-         */
-        resetForm() {
-            // Reset form data - using direct property assignment for better reactivity
-            this.formData.goalStatus = '';
-            this.formData.compliance = '';
-            this.formData.goalText = '';
-            this.formData.hypothesisText = '';
-            this.formData.reasonText = '';
-            this.formData.time = this.currentTime;
-            
-            // Reset application state
-            this.error = null;
-            this.report = null;
-        },
-        
-        /**
-         * Validate the form before submission
-         * @returns {boolean} - Whether the form is valid
-         */
-        validateForm() {
-            // Check required fields
-            if (!this.formData.goalStatus) {
-                this.error = 'Bitte wählen Sie den Physiotherapie-Ziel-Status aus.';
-                return false;
-            }
-            
-            if (!this.formData.compliance) {
-                this.error = 'Bitte wählen Sie die Compliance aus.';
-                return false;
-            }
-            
-            if (!this.formData.goalText.trim()) {
-                this.error = 'Bitte geben Sie das Therapieziel ein.';
-                return false;
-            }
-            
-            if (!this.formData.hypothesisText.trim()) {
-                this.error = 'Bitte geben Sie die Hypothese ein.';
-                return false;
-            }
-            
-            // If goal is not achieved, reason is required
-            if (this.formData.goalStatus === 'not-achieved' && !this.formData.reasonText.trim()) {
-                this.error = 'Bitte geben Sie eine Begründung für die Nicht-Erreichung des Ziels ein.';
-                return false;
-            }
-            
-            // Clear any previous errors
-            this.error = null;
-            return true;
-        },
-        
-        /**
-         * Submit the form to the OpenRouter API
-         */
-        async submitForm() {
-            // Validate the form
-            if (!this.validateForm()) {
-                // Display error to user (could be enhanced with a toast notification)
-                alert(this.error);
-                return;
-            }
-            
-            try {
-                // Set submitting state
-                this.isSubmitting = true;
-                
-                // Ensure the time is up to date
-                this.updateTime();
-                
-                // Send the form data to OpenRouter
-                const result = await OpenRouterService.sendFormData(this.formData);
-                
-                // Display the generated report
-                this.report = result.report || 'Der Abschlussbericht konnte nicht generiert werden.';
-                
-                // Scroll to the report section
-                this.$nextTick(() => {
-                    const reportElement = document.querySelector('.result-container');
-                    if (reportElement) {
-                        reportElement.scrollIntoView({ behavior: 'smooth' });
-                    }
-                });
-            } catch (error) {
-                // Handle error
-                this.error = error.message || 'Ein unbekannter Fehler ist aufgetreten.';
-                alert(this.error);
-            } finally {
-                // Reset submitting state
-                this.isSubmitting = false;
+    updateTime();
+    setInterval(updateTime, 60000); // Update every minute
+
+    // Show/hide reason field based on goal status
+    goalStatusEl.addEventListener('change', () => {
+        if (goalStatusEl.value === 'nicht-erreicht') {
+            reasonGroupEl.style.display = 'block';
+            reasonEl.setAttribute('required', '');
+            goalStatusIndicator.className = 'indicator red';
+        } else {
+            reasonGroupEl.style.display = 'none';
+            reasonEl.removeAttribute('required');
+            if (goalStatusEl.value === 'erreicht') {
+                goalStatusIndicator.className = 'indicator green';
+            } else {
+                goalStatusIndicator.className = 'indicator';
             }
         }
+    });
+
+    // Update compliance indicator
+    complianceEl.addEventListener('change', () => {
+        if (complianceEl.value === 'ja') {
+            complianceIndicator.className = 'indicator green';
+        } else if (complianceEl.value === 'nein') {
+            complianceIndicator.className = 'indicator red';
+        } else {
+            complianceIndicator.className = 'indicator';
+        }
+    });
+
+    // Form submission
+    reportForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Validate form
+        if (!reportForm.checkValidity()) {
+            alert('Bitte füllen Sie alle erforderlichen Felder aus.');
+            return;
+        }
+        
+        // Show loader
+        reportSection.style.display = 'block';
+        loader.style.display = 'block';
+        reportContainer.style.display = 'none';
+        
+        // Collect form data
+        const formData = {
+            time: currentTimeEl.value,
+            goalStatus: goalStatusEl.value,
+            compliance: complianceEl.value,
+            therapyGoal: therapyGoalEl.value,
+            hypothesis: hypothesisEl.value,
+            reason: goalStatusEl.value === 'nicht-erreicht' ? reasonEl.value : ''
+        };
+        
+        try {
+            // Generate report using OpenRouter API
+            const report = await generateReport(formData);
+            
+            // Display report
+            displayReport(formData, report);
+            
+            // Hide loader and show report
+            loader.style.display = 'none';
+            reportContainer.style.display = 'block';
+            
+            // Scroll to report
+            reportSection.scrollIntoView({ behavior: 'smooth' });
+        } catch (error) {
+            console.error('Error generating report:', error);
+            alert('Fehler bei der Berichterstellung. Bitte versuchen Sie es erneut.');
+            loader.style.display = 'none';
+            reportSection.style.display = 'none';
+        }
+    });
+
+    // Reset form
+    resetBtn.addEventListener('click', () => {
+        // Reset indicators
+        goalStatusIndicator.className = 'indicator';
+        complianceIndicator.className = 'indicator';
+        
+        // Hide reason field
+        reasonGroupEl.style.display = 'none';
+        
+        // Hide report section
+        reportSection.style.display = 'none';
+        
+        // Update time
+        updateTime();
+    });
+
+    // Display the generated report
+    function displayReport(formData, reportText) {
+        // Create summary
+        const summaryHTML = `
+            <div class="summary-item">
+                <strong>Zeitpunkt:</strong> ${formData.time}
+            </div>
+            <div class="summary-item">
+                <strong>Therapieziel Status:</strong> 
+                <span class="${formData.goalStatus === 'erreicht' ? 'success' : 'danger'}">
+                    ${formData.goalStatus === 'erreicht' ? 'Ziel erreicht' : 'Ziel nicht erreicht'}
+                </span>
+                <span class="indicator ${formData.goalStatus === 'erreicht' ? 'green' : 'red'}"></span>
+            </div>
+            <div class="summary-item">
+                <strong>Compliance:</strong> 
+                <span class="${formData.compliance === 'ja' ? 'success' : 'danger'}">
+                    ${formData.compliance === 'ja' ? 'Ja' : 'Nein'}
+                </span>
+                <span class="indicator ${formData.compliance === 'ja' ? 'green' : 'red'}"></span>
+            </div>
+            <div class="summary-item">
+                <strong>Therapieziel:</strong> ${formData.therapyGoal}
+            </div>
+        `;
+        
+        summaryContentEl.innerHTML = summaryHTML;
+        
+        // Format and display the report text
+        reportTextEl.innerHTML = reportText;
     }
 });
+
+// Function to generate report using OpenRouter API
+async function generateReport(formData) {
+    try {
+        const report = await openRouterService.generatePhysiotherapyReport(formData);
+        return report;
+    } catch (error) {
+        console.error('Error in report generation:', error);
+        throw error;
+    }
+}

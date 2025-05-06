@@ -1,15 +1,23 @@
 {
-  "name": "physiotherapie-abschlussbericht",
+  "name": "reha2025",
   "version": "1.0.0",
   "description": "Physiotherapie Abschlussbericht Generator",
   "main": "index.html",
-  "dependencies": {
-    "axios": "^1.6.0"
-  },
   "scripts": {
-    "dev": "vercel dev",
-    "deploy": "vercel --prod"
+    "start": "serve .",
+    "deploy": "gh-pages -d ."
   },
+  "keywords": [
+    "physiotherapy",
+    "report",
+    "generator",
+    "healthcare"
+  ],
   "author": "",
-  "license": "ISC"
+  "license": "MIT",
+  "devDependencies": {
+    "gh-pages": "^6.0.0",
+    "serve": "^14.2.1"
+  },
+  "dependencies": {}
 }

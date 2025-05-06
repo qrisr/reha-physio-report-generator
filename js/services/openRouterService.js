@@ -1,210 +1,135 @@
 /**
- * OpenRouter Service
- * Handles communication with the OpenRouter API for processing physiotherapy reports
+ * OpenRouter Service for generating physiotherapy reports
+ * This service handles communication with the OpenRouter API
  */
-
-const OpenRouterService = {
-    // Verwenden Sie die lokale Serverless Function statt direkter API-Aufrufe
-    apiUrl: '/api/openrouter',
+const openRouterService = {
+    // API endpoint for OpenRouter
+    apiUrl: 'https://openrouter.ai/api/v1/chat/completions',
     
-    // Kein API-Schlüssel mehr im Frontend-Code!
-    
-    // Das Modell wird jetzt in der Anfrage spezifiziert
-    model: 'anthropic/claude-3-opus',
+    // Your API key (should be replaced with a proper API key)
+    apiKey: 'YOUR_OPENROUTER_API_KEY',
     
     /**
-     * Send form data to OpenRouter API via serverless function
-     * @param {Object} formData - The form data to send
-     * @returns {Promise} - Promise that resolves with the generated report
+     * Generate a physiotherapy report based on form data
+     * @param {Object} formData - The form data containing patient information
+     * @returns {Promise<string>} - The generated report text
      */
-    async sendFormData(formData) {
-        // Always use demo mode for GitHub Pages deployment
-        console.log('Using demo mode for report generation');
-        return {
-            report: this.generateDemoReport(formData)
-        };
+    generatePhysiotherapyReport: async function(formData) {
+        // Create the prompt for the AI
+        const prompt = this.createPrompt(formData);
         
-        /* 
-        // The following code is commented out for GitHub Pages deployment
-        // Uncomment and configure API key for production use with Vercel
         try {
-            // Format the data for the prompt
-            const prompt = this.formatPrompt(formData);
-            
-            // Prepare the request to our serverless function
-            const response = await axios.post(this.apiUrl, {
-                model: this.model,
-                messages: [
-                    {
-                        role: "system",
-                        content: "Du bist ein erfahrener Physiotherapeut, der professionelle Abschlussberichte verfasst. Erstelle einen strukturierten, detaillierten Abschlussbericht basierend auf den gegebenen Informationen."
-                    },
-                    {
-                        role: "user",
-                        content: prompt
-                    }
-                ],
-                temperature: 0.7,
-                max_tokens: 1500
-            });
-            
-            // Check if the response is valid
-            if (!response.data || !response.data.choices || !response.data.choices[0]) {
-                throw new Error('Ungültige Antwort von der KI');
+            // For demo purposes, if no API key is provided, return a mock response
+            if (this.apiKey === 'YOUR_OPENROUTER_API_KEY') {
+                console.warn('Using mock response. Replace with actual API key for production.');
+                return this.getMockResponse(formData);
             }
             
-            // Extract the generated report from the response
-            const generatedReport = response.data.choices[0].message.content;
+            // Make the API request
+            const response = await fetch(this.apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.apiKey}`,
+                    'HTTP-Referer': window.location.href,
+                    'X-Title': 'Physiotherapie Abschlussbericht Generator'
+                },
+                body: JSON.stringify({
+                    model: 'openai/gpt-3.5-turbo',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: 'Du bist ein erfahrener Physiotherapeut, der professionelle Abschlussberichte verfasst. Deine Berichte sind klar strukturiert, fachlich korrekt und verwenden physiotherapeutische Fachsprache.'
+                        },
+                        {
+                            role: 'user',
+                            content: prompt
+                        }
+                    ]
+                })
+            });
             
-            return {
-                report: generatedReport
-            };
+            if (!response.ok) {
+                throw new Error(`API request failed with status ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data.choices[0].message.content;
         } catch (error) {
-            console.error('Error sending data to OpenRouter:', error);
-            
-            // Fallback to demo mode if there's an error
-            return {
-                report: this.generateDemoReport(formData)
-            };
+            console.error('Error calling OpenRouter API:', error);
+            throw error;
         }
-        */
     },
     
     /**
-     * Format the prompt for the AI model
-     * @param {Object} formData - The form data to format
-     * @returns {String} - Formatted prompt
-     */
-    formatPrompt(formData) {
-        // Convert the goal status to a more readable format
-        const goalStatusText = formData.goalStatus === 'achieved' ? 'Ziel erreicht' : 'Ziel nicht erreicht';
-        
-        // Convert compliance to a more readable format
-        const complianceText = formData.compliance === 'yes' ? 'Ja' : 'Nein';
-        
-        // Traffic light indicators for HTML output
-        const goalTrafficLight = formData.goalStatus === 'achieved' ? '🟢' : '🔴';
-        const complianceTrafficLight = formData.compliance === 'yes' ? '🟢' : '🔴';
-        
-        // Build a structured prompt for the AI
-        let prompt = `
-Erstelle einen Physiotherapie-Abschlussbericht mit folgenden Informationen:
-
-Zeit: ${formData.time}
-Physiotherapie-Ziel Status: ${goalStatusText} ${goalTrafficLight}
-Compliance: ${complianceText} ${complianceTrafficLight}
-Therapieziel: ${formData.goalText}
-Hypothese: ${formData.hypothesisText}
-`;
-
-        // Add reason if goal was not achieved
-        if (formData.goalStatus === 'not-achieved' && formData.reasonText) {
-            prompt += `Begründung für Nicht-Erreichung des Ziels: ${formData.reasonText}\n`;
-        }
-
-        prompt += `
-Bitte strukturiere den Bericht in folgende Abschnitte:
-
-WICHTIG: Beginne den Bericht mit einer Zusammenfassung der Formularinformationen in einer Box, die exakt die oben genannten Informationen enthält, inklusive der Ampel-Symbole (🟢 für positive und 🔴 für negative Antworten).
-
-Danach folgen diese Abschnitte:
-1. Patienteninformationen und Behandlungszeitraum
-2. Ursprüngliche Diagnose und Befund
-3. Therapieziele und Maßnahmen
-4. Behandlungsverlauf
-5. Ergebnisse und aktueller Status
-6. Empfehlungen für weitere Maßnahmen
-
-Der Bericht sollte professionell, detailliert und für medizinisches Fachpersonal geeignet sein.
-`;
-
-        return prompt;
-    },
-    
-    /**
-     * Generate a demo report for testing purposes
+     * Create a prompt for the AI based on form data
      * @param {Object} formData - The form data
-     * @returns {String} - Demo report HTML
+     * @returns {string} - The formatted prompt
      */
-    generateDemoReport(formData) {
-        // Convert the goal status to a more readable format
-        const goalStatusText = formData.goalStatus === 'achieved' ? 'Ziel erreicht' : 'Ziel nicht erreicht';
-        
-        // Convert compliance to a more readable format
-        const complianceText = formData.compliance === 'yes' ? 'Ja' : 'Nein';
-        
-        // Current date for the report
-        const today = new Date();
-        const dateStr = today.toLocaleDateString('de-DE');
-        
-        // Demo patient name
-        const patientName = "Max Mustermann";
-        
-        // Traffic light indicators for HTML output
-        const goalTrafficLight = formData.goalStatus === 'achieved' ? '🟢' : '🔴';
-        const complianceTrafficLight = formData.compliance === 'yes' ? '🟢' : '🔴';
-        
-        // Build a demo report
+    createPrompt: function(formData) {
         return `
-<div class="demo-notice">
-    <strong>DEMO-MODUS</strong>: Dies ist ein Beispielbericht für Testzwecke. 
-    Um echte KI-generierte Berichte zu erhalten, tragen Sie bitte Ihren OpenRouter API-Schlüssel in der Datei <code>js/services/openRouterService.js</code> ein.
-</div>
+Erstelle einen professionellen physiotherapeutischen Abschlussbericht basierend auf folgenden Informationen:
 
-<div class="form-summary">
-    <div class="form-summary-item"><strong>Zeit:</strong> ${formData.time}</div>
-    <div class="form-summary-item"><strong>Physiotherapie-Ziel Status:</strong> ${goalStatusText} ${goalTrafficLight}</div>
-    <div class="form-summary-item"><strong>Compliance:</strong> ${complianceText} ${complianceTrafficLight}</div>
-    <div class="form-summary-item"><strong>Therapieziel:</strong> ${formData.goalText}</div>
-    <div class="form-summary-item"><strong>Hypothese:</strong> ${formData.hypothesisText}</div>
-    ${formData.goalStatus === 'not-achieved' && formData.reasonText ? 
-      `<div class="form-summary-item"><strong>Begründung für Nicht-Erreichung des Ziels:</strong> ${formData.reasonText}</div>` : ''}
-</div>
+- Zeitpunkt: ${formData.time}
+- Therapieziel Status: ${formData.goalStatus === 'erreicht' ? 'Ziel erreicht' : 'Ziel nicht erreicht'}
+- Compliance: ${formData.compliance === 'ja' ? 'Ja' : 'Nein'}
+- Therapieziel: ${formData.therapyGoal}
+- Hypothese: ${formData.hypothesis}
+${formData.reason ? `- Begründung für Nicht-Erreichung des Ziels: ${formData.reason}` : ''}
 
-<h3>Physiotherapeutischer Abschlussbericht</h3>
-<p><strong>Datum:</strong> ${dateStr}</p>
+Der Bericht sollte folgende Struktur haben:
+1. Einleitung mit Patienteninformationen (erfinde realistische Details)
+2. Ursprüngliche Diagnose und Befund
+3. Behandlungsverlauf
+4. Abschlussbefund
+5. Empfehlungen für den Patienten
 
-<h4>1. Patienteninformationen und Behandlungszeitraum</h4>
-<p>
-    <strong>Patient:</strong> ${patientName}<br>
-    <strong>Behandlungszeitraum:</strong> 01.04.2025 - ${dateStr}<br>
-    <strong>Behandlungszeit:</strong> ${formData.time} Uhr
-</p>
+Verwende physiotherapeutische Fachsprache und halte den Bericht professionell. Formatiere den Text mit HTML-Absätzen (<p>) für bessere Lesbarkeit.
+`;
+    },
+    
+    /**
+     * Get a mock response for demonstration purposes
+     * @param {Object} formData - The form data
+     * @returns {string} - A mock report
+     */
+    getMockResponse: function(formData) {
+        const goalAchieved = formData.goalStatus === 'erreicht';
+        const goodCompliance = formData.compliance === 'ja';
+        
+        return `
+<p><strong>Physiotherapeutischer Abschlussbericht</strong></p>
 
-<h4>2. Ursprüngliche Diagnose und Befund</h4>
-<p>${formData.hypothesisText}</p>
+<p><strong>Patient:</strong> Max Mustermann<br>
+<strong>Geburtsdatum:</strong> 15.06.1975<br>
+<strong>Behandlungszeitraum:</strong> 01.03.2025 - 30.04.2025<br>
+<strong>Verordnungsdiagnose:</strong> Chronische Lumbalgie (M54.5)</p>
 
-<h4>3. Therapieziele und Maßnahmen</h4>
-<p>
-    <strong>Hauptziel:</strong> ${formData.goalText}<br>
-    <strong>Maßnahmen:</strong> Mobilisation, Kräftigung, Propriozeptionstraining, Gangschule
-</p>
+<p><strong>Ursprüngliche Diagnose und Befund:</strong></p>
+<p>Der Patient stellte sich initial mit chronischen Rückenschmerzen im lumbalen Bereich vor, die seit ca. 6 Monaten bestehen und durch längeres Sitzen verstärkt werden. Die klinische Untersuchung zeigte eine eingeschränkte Beweglichkeit der LWS in Flexion und Extension, eine hypotone Rumpfmuskulatur sowie myofasziale Triggerpunkte im M. quadratus lumborum beidseits. Der Patient berichtete über Schmerzen (VAS 7/10) bei alltäglichen Aktivitäten und berufsbedingtem langem Sitzen.</p>
 
-<h4>4. Behandlungsverlauf</h4>
-<p>
-    <strong>Compliance:</strong> ${complianceText}<br>
-    <strong>Verlauf:</strong> Der Patient zeigte ${complianceText === 'Ja' ? 'eine gute Mitarbeit und regelmäßige Teilnahme an den Therapiesitzungen' : 'Schwierigkeiten bei der regelmäßigen Teilnahme an den Therapiesitzungen'}.
-</p>
+<p><strong>Therapieziel:</strong> ${formData.therapyGoal}</p>
 
-<h4>5. Ergebnisse und aktueller Status</h4>
-<p>
-    <strong>Zielerreichung:</strong> ${goalStatusText}<br>
-    ${formData.goalStatus === 'not-achieved' ? `<strong>Begründung für Nicht-Erreichung:</strong> ${formData.reasonText}<br>` : ''}
-    <strong>Aktueller Status:</strong> ${formData.goalStatus === 'achieved' ? 
-        'Der Patient kann die Bewegungen schmerzfrei durchführen und zeigt eine deutliche Verbesserung der Funktionalität.' : 
-        'Der Patient zeigt eine teilweise Verbesserung, benötigt jedoch weitere Therapie zur vollständigen Zielerreichung.'}
-</p>
+<p><strong>Behandlungsverlauf:</strong></p>
+<p>Die Behandlung umfasste manuelle Therapie zur Mobilisation der LWS, Triggerpunktbehandlung, progressive Kräftigungsübungen für die Rumpfmuskulatur sowie ergonomische Beratung. ${goodCompliance ? 'Der Patient zeigte eine sehr gute Compliance und führte die empfohlenen Heimübungen regelmäßig durch.' : 'Die Compliance des Patienten bezüglich der Heimübungen war leider unzureichend, was den Therapieerfolg beeinträchtigte.'}</p>
 
-<h4>6. Empfehlungen für weitere Maßnahmen</h4>
-<p>
-    ${formData.goalStatus === 'achieved' ? 
-        'Regelmäßige Eigenübungen zur Erhaltung der erreichten Funktionalität. Kontrolle in 3 Monaten empfohlen.' : 
-        'Fortsetzung der Therapie mit 2 Einheiten pro Woche für weitere 6 Wochen. Anpassung des Heimübungsprogramms.'}
-</p>
+<p><strong>Hypothese:</strong> ${formData.hypothesis}</p>
 
-<p class="signature">
-    <strong>Unterschrift Therapeut/in:</strong> _______________________
-</p>
+<p><strong>Abschlussbefund:</strong></p>
+${goalAchieved ? 
+`<p>Das Therapieziel wurde erreicht. Der Patient zeigt eine deutliche Verbesserung der Beweglichkeit der LWS (Flexion/Extension nahezu normwertig). Die Rumpfmuskulatur weist eine verbesserte Tonisierung auf, und die myofaszialen Triggerpunkte konnten erfolgreich behandelt werden. Die Schmerzintensität hat sich signifikant reduziert (VAS 2/10). Der Patient kann alltägliche Aktivitäten wieder schmerzfrei durchführen und hat Strategien zur Schmerzprävention erlernt.</p>` 
+: 
+`<p>Das Therapieziel wurde nicht vollständig erreicht. Trotz partieller Verbesserung der Beweglichkeit der LWS bestehen weiterhin Einschränkungen in der Extension. Die Rumpfmuskulatur zeigt eine leichte Verbesserung der Tonisierung, jedoch sind die myofaszialen Triggerpunkte im M. quadratus lumborum noch teilweise aktiv. Die Schmerzintensität hat sich nur mäßig reduziert (VAS 5/10).</p>
+<p><strong>Begründung für Nicht-Erreichung des Ziels:</strong> ${formData.reason}</p>`}
+
+<p><strong>Empfehlungen:</strong></p>
+<p>${goalAchieved ? 
+'Zur Aufrechterhaltung des Therapieerfolgs wird dem Patienten empfohlen, die erlernten Übungen zur Kräftigung der Rumpfmuskulatur 3x wöchentlich fortzuführen. Zusätzlich sollte auf eine ergonomische Sitzposition am Arbeitsplatz geachtet und regelmäßige Bewegungspausen eingelegt werden. Sportliche Aktivitäten wie Schwimmen oder Nordic Walking sind zu empfehlen. Eine Kontrolluntersuchung in 3 Monaten wird angeraten.' 
+: 
+'Es wird eine Fortsetzung der physiotherapeutischen Behandlung für weitere 6 Einheiten empfohlen, mit verstärktem Fokus auf die aktive Mitarbeit des Patienten und intensiviertes Training der Rumpfmuskulatur. Die Heimübungen sollten täglich durchgeführt werden, und ergonomische Anpassungen am Arbeitsplatz sind dringend umzusetzen. Eine begleitende Schmerztherapie sollte in Erwägung gezogen werden.'}</p>
+
+<p>Erstellt am: ${formData.time}<br>
+Physiotherapeut: Dr. med. Anna Therapeut</p>
 `;
     }
 };
