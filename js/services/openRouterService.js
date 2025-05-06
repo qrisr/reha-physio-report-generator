@@ -160,20 +160,24 @@ const openRouterService = {
         const therapieZielStatus = formData.goalStatus; // Use exact value: 'erreicht' or 'nicht-erreicht'
         const compliance = formData.compliance; // Use exact value: 'ja' or 'nein'
         
+        // Add emojis based on status
+        const therapieZielEmoji = therapieZielStatus === 'erreicht' ? '🟢' : '🔴';
+        const complianceEmoji = compliance === 'ja' ? '🟢' : '🔴';
+        
         return `
 Erstelle einen professionellen physiotherapeutischen Abschlussbericht basierend auf folgenden Informationen:
 
 - Zeitpunkt: ${formData.time}
-- Therapieziel Status: ${therapieZielStatus}
-- Compliance: ${compliance}
+- Therapieziel Status: ${therapieZielEmoji} ${therapieZielStatus}
+- Compliance: ${complianceEmoji} ${compliance}
 - Therapieziel: ${formData.therapyGoal}
 - Hypothese: ${formData.hypothesis}
 ${formData.reason ? `- Begründung für Nicht-Erreichung des Ziels: ${formData.reason}` : ''}
 
 
-WICHTIG: Verwende die exakten Formulardaten in deinem Bericht. Wenn "Therapieziel Status" als "${therapieZielStatus}" angegeben ist, verwende genau diesen Wert im Bericht. Wenn "Compliance" als "${compliance}" angegeben ist, verwende genau diesen Wert im Bericht.
+WICHTIG: Verwende die exakten Formulardaten in deinem Bericht. Wenn "Therapieziel Status" als "${therapieZielStatus}" angegeben ist, verwende genau diesen Wert im Bericht, zusammen mit dem passenden Emoji (${therapieZielEmoji}). Wenn "Compliance" als "${compliance}" angegeben ist, verwende genau diesen Wert im Bericht, zusammen mit dem passenden Emoji (${complianceEmoji}).
 
-Verwende physiotherapeutische Fachsprache und halte den Bericht professionell. Formatiere den Text mit HTML-Absätzen (<p>) für bessere Lesbarkeit.
+Verwende physiotherapeutische Fachsprache und halte den Bericht professionell. Formatiere den Text mit HTML-Absätzen (<p>) für bessere Lesbarkeit. Stelle sicher, dass die Emojis (🟢 für positive Werte und 🔴 für negative Werte) im Text ähnlich groß wie der Text selbst sind.
 `;
     },
     
@@ -186,6 +190,10 @@ Verwende physiotherapeutische Fachsprache und halte den Bericht professionell. F
         // Use the exact values from the form
         const therapieZielStatus = formData.goalStatus;
         const compliance = formData.compliance;
+        
+        // Add emojis based on status
+        const therapieZielEmoji = therapieZielStatus === 'erreicht' ? '🟢' : '🔴';
+        const complianceEmoji = compliance === 'ja' ? '🟢' : '🔴';
         
         return `
 <p><strong>Physiotherapeutischer Abschlussbericht</strong></p>
@@ -203,12 +211,12 @@ Verwende physiotherapeutische Fachsprache und halte den Bericht professionell. F
 <p><strong>Behandlungsverlauf:</strong></p>
 <p>Die Behandlung umfasste manuelle Therapie zur Mobilisation der LWS, Triggerpunktbehandlung, progressive Kräftigungsübungen für die Rumpfmuskulatur sowie ergonomische Beratung.</p>
 
-<p><strong>Compliance:</strong> ${compliance}</p>
+<p><strong>Compliance:</strong> ${complianceEmoji} ${compliance}</p>
 
 <p><strong>Hypothese:</strong> ${formData.hypothesis}</p>
 
 <p><strong>Abschlussbefund:</strong></p>
-<p><strong>Therapieziel Status:</strong> ${therapieZielStatus}</p>
+<p><strong>Therapieziel Status:</strong> ${therapieZielEmoji} ${therapieZielStatus}</p>
 
 ${therapieZielStatus === 'erreicht' ? 
 `<p>Der Patient zeigt eine deutliche Verbesserung der Beweglichkeit der LWS (Flexion/Extension nahezu normwertig). Die Rumpfmuskulatur weist eine verbesserte Tonisierung auf, und die myofaszialen Triggerpunkte konnten erfolgreich behandelt werden. Die Schmerzintensität hat sich signifikant reduziert (VAS 2/10). Der Patient kann alltägliche Aktivitäten wieder schmerzfrei durchführen und hat Strategien zur Schmerzprävention erlernt.</p>` 
