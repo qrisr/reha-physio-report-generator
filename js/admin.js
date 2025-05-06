@@ -424,7 +424,14 @@ function loadSavedSettings() {
             modelOption.selected = true;
         }
         
-        apiKeyInput.value = settings.apiKey || '';
+        // Don't show the actual API key, just indicate if one exists
+        if (settings.apiKey && settings.apiKey.trim() !== '') {
+            apiKeyInput.value = '••••••••••••••••••••••';
+            apiKeyInput.setAttribute('data-has-key', 'true');
+        } else {
+            apiKeyInput.value = '';
+            apiKeyInput.removeAttribute('data-has-key');
+        }
     } else {
         // Set defaults
         systemPromptTextarea.value = adminConfig.defaultSystemPrompt;

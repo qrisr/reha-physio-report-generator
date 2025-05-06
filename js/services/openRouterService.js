@@ -70,8 +70,8 @@ const openRouterService = {
         try {
             // Check if API key is provided
             if (!this.settings.apiKey || this.settings.apiKey.trim() === '') {
-                console.warn('No API key provided. Using mock response.');
-                return this.getMockResponse(formData);
+                console.warn('No API key provided.');
+                return '<p><strong>Fehler:</strong> Kein API-Schlüssel vorhanden. Bitte geben Sie einen gültigen OpenRouter API-Schlüssel im Admin-Bereich ein.</p>';
             }
             
             console.log('Using API key:', this.settings.apiKey.substring(0, 3) + '...');
@@ -111,9 +111,8 @@ const openRouterService = {
         } catch (error) {
             console.error('Error calling OpenRouter API:', error);
             
-            // If API call fails, use mock response as fallback
-            console.warn('API call failed. Using mock response as fallback.');
-            return this.getMockResponse(formData);
+            // Return error message instead of mock response
+            return '<p><strong>Fehler:</strong> Service nicht erreichbar. Bitte versuchen Sie es später erneut oder überprüfen Sie Ihre Internetverbindung.</p>';
         }
     },
     
