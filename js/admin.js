@@ -275,8 +275,9 @@ function createAdminModal() {
     apiKeyLabel.style.marginBottom = '5px';
     apiKeyLabel.style.fontWeight = 'bold';
     
+    // Create API key input with password type
     apiKeyInput = document.createElement('input');
-    apiKeyInput.type = 'text';
+    apiKeyInput.type = 'password';
     apiKeyInput.style.width = '100%';
     apiKeyInput.style.padding = '8px';
     apiKeyInput.style.boxSizing = 'border-box';

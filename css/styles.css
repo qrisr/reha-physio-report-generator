@@ -65,16 +65,29 @@ label {
     font-weight: bold;
 }
 
-input, select, textarea {
+input, select {
     width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-family: var(--font-family);
     font-size: 16px;
-    resize: none; /* Prevent resizing of textareas */
+    resize: none; /* Prevent resizing */
     user-drag: none; /* Prevent dragging */
     -webkit-user-drag: none;
+}
+
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: var(--font-family);
+    font-size: 16px;
+    resize: vertical; /* Allow only vertical resizing */
+    user-drag: none; /* Prevent dragging */
+    -webkit-user-drag: none;
+    min-height: 80px; /* Minimum height */
 }
 
 input:focus, select:focus, textarea:focus {

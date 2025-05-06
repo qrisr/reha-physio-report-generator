@@ -157,22 +157,22 @@ const openRouterService = {
      * @returns {string} - The formatted prompt
      */
     createPrompt: function(formData) {
+        // Prepare the exact values from the form without transforming them
+        const therapieZielStatus = formData.goalStatus; // Use exact value: 'erreicht' or 'nicht-erreicht'
+        const compliance = formData.compliance; // Use exact value: 'ja' or 'nein'
+        
         return `
 Erstelle einen professionellen physiotherapeutischen Abschlussbericht basierend auf folgenden Informationen:
 
 - Zeitpunkt: ${formData.time}
-- Therapieziel Status: ${formData.goalStatus === 'erreicht' ? 'Ziel erreicht' : 'Ziel nicht erreicht'}
-- Compliance: ${formData.compliance === 'ja' ? 'Ja' : 'Nein'}
+- Therapieziel Status: ${therapieZielStatus}
+- Compliance: ${compliance}
 - Therapieziel: ${formData.therapyGoal}
 - Hypothese: ${formData.hypothesis}
 ${formData.reason ? `- Begründung für Nicht-Erreichung des Ziels: ${formData.reason}` : ''}
 
-Der Bericht sollte folgende Struktur haben:
-1. Einleitung mit Patienteninformationen (erfinde realistische Details)
-2. Ursprüngliche Diagnose und Befund
-3. Behandlungsverlauf
-4. Abschlussbefund
-5. Empfehlungen für den Patienten
+
+WICHTIG: Verwende die exakten Formulardaten in deinem Bericht. Wenn "Therapieziel Status" als "${therapieZielStatus}" angegeben ist, verwende genau diesen Wert im Bericht. Wenn "Compliance" als "${compliance}" angegeben ist, verwende genau diesen Wert im Bericht.
 
 Verwende physiotherapeutische Fachsprache und halte den Bericht professionell. Formatiere den Text mit HTML-Absätzen (<p>) für bessere Lesbarkeit.
 `;
@@ -184,8 +184,9 @@ Verwende physiotherapeutische Fachsprache und halte den Bericht professionell. F
      * @returns {string} - A mock report
      */
     getMockResponse: function(formData) {
-        const goalAchieved = formData.goalStatus === 'erreicht';
-        const goodCompliance = formData.compliance === 'ja';
+        // Use the exact values from the form
+        const therapieZielStatus = formData.goalStatus;
+        const compliance = formData.compliance;
         
         return `
 <p><strong>Physiotherapeutischer Abschlussbericht</strong></p>
@@ -201,19 +202,23 @@ Verwende physiotherapeutische Fachsprache und halte den Bericht professionell. F
 <p><strong>Therapieziel:</strong> ${formData.therapyGoal}</p>
 
 <p><strong>Behandlungsverlauf:</strong></p>
-<p>Die Behandlung umfasste manuelle Therapie zur Mobilisation der LWS, Triggerpunktbehandlung, progressive Kräftigungsübungen für die Rumpfmuskulatur sowie ergonomische Beratung. ${goodCompliance ? 'Der Patient zeigte eine sehr gute Compliance und führte die empfohlenen Heimübungen regelmäßig durch.' : 'Die Compliance des Patienten bezüglich der Heimübungen war leider unzureichend, was den Therapieerfolg beeinträchtigte.'}</p>
+<p>Die Behandlung umfasste manuelle Therapie zur Mobilisation der LWS, Triggerpunktbehandlung, progressive Kräftigungsübungen für die Rumpfmuskulatur sowie ergonomische Beratung.</p>
+
+<p><strong>Compliance:</strong> ${compliance}</p>
 
 <p><strong>Hypothese:</strong> ${formData.hypothesis}</p>
 
 <p><strong>Abschlussbefund:</strong></p>
-${goalAchieved ? 
-`<p>Das Therapieziel wurde erreicht. Der Patient zeigt eine deutliche Verbesserung der Beweglichkeit der LWS (Flexion/Extension nahezu normwertig). Die Rumpfmuskulatur weist eine verbesserte Tonisierung auf, und die myofaszialen Triggerpunkte konnten erfolgreich behandelt werden. Die Schmerzintensität hat sich signifikant reduziert (VAS 2/10). Der Patient kann alltägliche Aktivitäten wieder schmerzfrei durchführen und hat Strategien zur Schmerzprävention erlernt.</p>` 
+<p><strong>Therapieziel Status:</strong> ${therapieZielStatus}</p>
+
+${therapieZielStatus === 'erreicht' ? 
+`<p>Der Patient zeigt eine deutliche Verbesserung der Beweglichkeit der LWS (Flexion/Extension nahezu normwertig). Die Rumpfmuskulatur weist eine verbesserte Tonisierung auf, und die myofaszialen Triggerpunkte konnten erfolgreich behandelt werden. Die Schmerzintensität hat sich signifikant reduziert (VAS 2/10). Der Patient kann alltägliche Aktivitäten wieder schmerzfrei durchführen und hat Strategien zur Schmerzprävention erlernt.</p>` 
 : 
-`<p>Das Therapieziel wurde nicht vollständig erreicht. Trotz partieller Verbesserung der Beweglichkeit der LWS bestehen weiterhin Einschränkungen in der Extension. Die Rumpfmuskulatur zeigt eine leichte Verbesserung der Tonisierung, jedoch sind die myofaszialen Triggerpunkte im M. quadratus lumborum noch teilweise aktiv. Die Schmerzintensität hat sich nur mäßig reduziert (VAS 5/10).</p>
+`<p>Trotz partieller Verbesserung der Beweglichkeit der LWS bestehen weiterhin Einschränkungen in der Extension. Die Rumpfmuskulatur zeigt eine leichte Verbesserung der Tonisierung, jedoch sind die myofaszialen Triggerpunkte im M. quadratus lumborum noch teilweise aktiv. Die Schmerzintensität hat sich nur mäßig reduziert (VAS 5/10).</p>
 <p><strong>Begründung für Nicht-Erreichung des Ziels:</strong> ${formData.reason}</p>`}
 
 <p><strong>Empfehlungen:</strong></p>
-<p>${goalAchieved ? 
+<p>${therapieZielStatus === 'erreicht' ? 
 'Zur Aufrechterhaltung des Therapieerfolgs wird dem Patienten empfohlen, die erlernten Übungen zur Kräftigung der Rumpfmuskulatur 3x wöchentlich fortzuführen. Zusätzlich sollte auf eine ergonomische Sitzposition am Arbeitsplatz geachtet und regelmäßige Bewegungspausen eingelegt werden. Sportliche Aktivitäten wie Schwimmen oder Nordic Walking sind zu empfehlen. Eine Kontrolluntersuchung in 3 Monaten wird angeraten.' 
 : 
 'Es wird eine Fortsetzung der physiotherapeutischen Behandlung für weitere 6 Einheiten empfohlen, mit verstärktem Fokus auf die aktive Mitarbeit des Patienten und intensiviertes Training der Rumpfmuskulatur. Die Heimübungen sollten täglich durchgeführt werden, und ergonomische Anpassungen am Arbeitsplatz sind dringend umzusetzen. Eine begleitende Schmerztherapie sollte in Erwägung gezogen werden.'}</p>
