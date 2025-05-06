@@ -154,14 +154,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="${formData.goalStatus === 'erreicht' ? 'success' : 'danger'}">
                     ${formData.goalStatus === 'erreicht' ? '🟢 Ziel erreicht' : '🔴 Ziel nicht erreicht'}
                 </span>
-                <span class="indicator ${formData.goalStatus === 'erreicht' ? 'green' : 'red'}"></span>
             </div>
             <div class="summary-item">
                 <strong>Compliance:</strong> 
                 <span class="${formData.compliance === 'ja' ? 'success' : 'danger'}">
                     ${formData.compliance === 'ja' ? '🟢 Ja' : '🔴 Nein'}
                 </span>
-                <span class="indicator ${formData.compliance === 'ja' ? 'green' : 'red'}"></span>
             </div>
             <div class="summary-item">
                 <strong>Therapieziel:</strong> ${formData.therapyGoal}
