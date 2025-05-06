@@ -166,6 +166,11 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="summary-item">
                 <strong>Therapieziel:</strong> ${formData.therapyGoal}
             </div>
+            ${formData.goalStatus === 'nicht-erreicht' && formData.reason ? `
+            <div class="summary-item">
+                <strong>Grund für Nichterreichung:</strong> ${formData.reason}
+            </div>
+            ` : ''}
         `;
         
         summaryContentEl.innerHTML = summaryHTML;
