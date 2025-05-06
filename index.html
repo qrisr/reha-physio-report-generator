@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>Physiotherapie Abschlussbericht Generator</h1>
+            <h1>Abschlussbericht erstellen</h1>
             <p>Erstellen Sie strukturierte Abschlussberichte für Ihre Patienten</p>
         </header>
 
@@ -18,12 +18,12 @@
                 <h2>Berichtsdaten eingeben</h2>
                 <form id="report-form">
                     <div class="form-group">
-                        <label for="current-time">Aktuelle Uhrzeit:</label>
+                        <label for="current-time">Zeit</label>
                         <input type="text" id="current-time" readonly>
                     </div>
 
                     <div class="form-group">
-                        <label for="goal-status">Physiotherapie-Ziel Status:</label>
+                        <label for="goal-status">Physiotherapie-Ziel *</label>
                         <div class="input-with-indicator">
                             <div class="select-wrapper">
                                 <select id="goal-status" required>
@@ -37,7 +37,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="compliance">Compliance:</label>
+                        <label for="compliance">Compliance</label>
                         <div class="input-with-indicator">
                             <div class="select-wrapper">
                                 <select id="compliance" required>
@@ -51,23 +51,23 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="therapy-goal">Therapieziel:</label>
-                        <textarea id="therapy-goal" rows="3" required></textarea>
+                        <label for="therapy-goal">Therapieziel</label>
+                        <textarea id="therapy-goal" rows="3" required placeholder="Beispiel: Patient will wieder Fahrrad fahren"></textarea>
                     </div>
 
                     <div class="form-group">
-                        <label for="hypothesis">Hypothese:</label>
-                        <textarea id="hypothesis" rows="3" required></textarea>
+                        <label for="hypothesis">Test Hypotheseneingabe</label>
+                        <textarea id="hypothesis" rows="3" required placeholder="Beispiel: Degenerative Veränderungen im Kniegelenk führen zu Schmerzen und Bewegungseinschränkungen"></textarea>
                     </div>
 
                     <div class="form-group" id="reason-group" style="display: none;">
-                        <label for="reason">Begründung für Nicht-Erreichung des Ziels:</label>
-                        <textarea id="reason" rows="3"></textarea>
+                        <label for="reason">Begründung für Nicht-Erreichung des Ziels</label>
+                        <textarea id="reason" rows="3" placeholder="Beispiel: Patient konnte aufgrund anhaltender Schmerzen die Übungen nicht regelmäßig durchführen"></textarea>
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" id="generate-btn">Bericht generieren</button>
-                        <button type="reset" id="reset-btn">Zurücksetzen</button>
+                        <button type="reset" id="reset-btn">Formular löschen</button>
+                        <button type="submit" id="generate-btn">Absenden</button>
                     </div>
                 </form>
             </section>

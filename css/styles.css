@@ -154,7 +154,8 @@ input:focus, select:focus, textarea:focus {
 
 .form-actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
+    gap: 10px;
     margin-top: 30px;
 }
 
@@ -185,12 +186,13 @@ button:active {
 }
 
 #reset-btn {
-    background-color: var(--secondary-color);
-    color: white;
+    background-color: white;
+    color: var(--dark-color);
+    border: 1px solid var(--secondary-color);
 }
 
 #reset-btn:hover {
-    background-color: #5c6670;
+    background-color: #f0f0f0;
 }
 
 .loader {
@@ -250,11 +252,11 @@ footer {
     }
     
     .form-actions {
-        flex-direction: column;
+        flex-direction: row;
         gap: 10px;
     }
     
     button {
-        width: 100%;
+        flex: 1;
     }
 }
