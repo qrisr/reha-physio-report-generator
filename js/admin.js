@@ -287,7 +287,7 @@ function createAdminModal() {
     apiKeyHelp.style.fontSize = '0.85em';
     apiKeyHelp.style.color = '#666';
     apiKeyHelp.style.marginTop = '5px';
-    apiKeyHelp.innerHTML = 'Geben Sie hier Ihren OpenRouter API-Schlüssel ein. Ohne gültigen API-Schlüssel wird eine Demo-Antwort angezeigt.';
+    apiKeyHelp.innerHTML = 'Geben Sie hier Ihren OpenRouter API-Schlüssel ein. Ohne gültigen API-Schlüssel kann kein Bericht generiert werden.';
     
     apiKeyGroup.appendChild(apiKeyLabel);
     apiKeyGroup.appendChild(apiKeyInput);
@@ -370,10 +370,24 @@ function validatePassword() {
 function saveSettings(e) {
     e.preventDefault();
     
+    // Get the current saved settings to check if we need to preserve the API key
+    const savedSettings = localStorage.getItem('adminSettings');
+    let currentApiKey = '';
+    
+    if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+        currentApiKey = settings.apiKey || '';
+    }
+    
+    // Check if the API key input contains the masked value
+    const isMaskedValue = apiKeyInput.value === '••••••••••••••••••••••';
+    
     const settings = {
         systemPrompt: systemPromptTextarea.value,
         model: modelSelect.value,
-        apiKey: apiKeyInput.value
+        // If the input is the masked value and we have a saved key, use the saved key
+        // Otherwise, use the value from the input (which could be a new key or empty)
+        apiKey: isMaskedValue ? currentApiKey : apiKeyInput.value
     };
     
     // Save to localStorage
