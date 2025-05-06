@@ -178,6 +178,8 @@ ${formData.reason ? `- Begründung für Nicht-Erreichung des Ziels: ${formData.r
 WICHTIG: Verwende die exakten Formulardaten in deinem Bericht. Wenn "Therapieziel Status" als "${therapieZielStatus}" angegeben ist, verwende genau diesen Wert im Bericht, zusammen mit dem passenden Emoji (${therapieZielEmoji}). Wenn "Compliance" als "${compliance}" angegeben ist, verwende genau diesen Wert im Bericht, zusammen mit dem passenden Emoji (${complianceEmoji}).
 
 Verwende physiotherapeutische Fachsprache und halte den Bericht professionell. Formatiere den Text mit HTML-Absätzen (<p>) für bessere Lesbarkeit. Stelle sicher, dass die Emojis (🟢 für positive Werte und 🔴 für negative Werte) im Text ähnlich groß wie der Text selbst sind.
+
+WICHTIG: Füge KEINE zusätzlichen farbigen Indikator-Punkte oder Kreise neben dem Text ein. Verwende NUR die Emojis (🟢/🔴) als visuelle Indikatoren.
 `;
     },
     
@@ -194,6 +196,8 @@ Verwende physiotherapeutische Fachsprache und halte den Bericht professionell. F
         // Add emojis based on status
         const therapieZielEmoji = therapieZielStatus === 'erreicht' ? '🟢' : '🔴';
         const complianceEmoji = compliance === 'ja' ? '🟢' : '🔴';
+        
+        // Note: No additional indicator dots are added, only emojis are used as visual indicators
         
         return `
 <p><strong>Physiotherapeutischer Abschlussbericht</strong></p>
