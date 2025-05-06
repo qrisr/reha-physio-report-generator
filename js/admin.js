@@ -88,7 +88,7 @@ function createAdminModal() {
     adminModal.style.width = '100%';
     adminModal.style.height = '100%';
     adminModal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-    adminModal.style.overflow = 'auto';
+    adminModal.style.overflow = 'hidden';
     
     // Create modal content
     const modalContent = document.createElement('div');
@@ -100,6 +100,8 @@ function createAdminModal() {
     modalContent.style.borderRadius = '5px';
     modalContent.style.width = '80%';
     modalContent.style.maxWidth = '600px';
+    modalContent.style.maxHeight = '80vh';
+    modalContent.style.overflow = 'auto';
     
     // Create modal header
     const modalHeader = document.createElement('div');
@@ -263,6 +265,9 @@ function showPasswordPrompt() {
     document.getElementById('password-prompt').style.display = 'block';
     adminForm.style.display = 'none';
     passwordInput.focus();
+    
+    // Reload saved settings to ensure fresh data
+    loadSavedSettings();
 }
 
 // Hide admin modal
@@ -275,6 +280,15 @@ function validatePassword() {
     if (passwordInput.value === adminConfig.password) {
         document.getElementById('password-prompt').style.display = 'none';
         adminForm.style.display = 'block';
+        
+        // Clear and reload the textarea to prevent text mixing issues
+        const savedSettings = localStorage.getItem('adminSettings');
+        if (savedSettings) {
+            const settings = JSON.parse(savedSettings);
+            systemPromptTextarea.value = settings.systemPrompt || adminConfig.defaultSystemPrompt;
+        } else {
+            systemPromptTextarea.value = adminConfig.defaultSystemPrompt;
+        }
     } else {
         alert('Falsches Passwort!');
     }
