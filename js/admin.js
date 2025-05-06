@@ -100,7 +100,7 @@ function createAdminModal() {
     modalContent.style.borderRadius = '5px';
     modalContent.style.width = '80%';
     modalContent.style.maxWidth = '600px';
-    modalContent.style.maxHeight = '96vh';
+    modalContent.style.maxHeight = '80vh';
     modalContent.style.overflow = 'auto';
     
     // Create modal header
@@ -309,6 +309,8 @@ function createAdminModal() {
     saveButton.style.border = 'none';
     saveButton.style.borderRadius = '4px';
     saveButton.style.cursor = 'pointer';
+    saveButton.style.marginTop = '15px';
+    saveButton.style.marginBottom = '10px';
     
     // Add elements to form
     adminForm.appendChild(promptGroup);
