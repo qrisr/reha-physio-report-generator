@@ -6,8 +6,43 @@ const openRouterService = {
     // API endpoint for OpenRouter
     apiUrl: 'https://openrouter.ai/api/v1/chat/completions',
     
-    // Your API key (should be replaced with a proper API key)
-    apiKey: 'YOUR_OPENROUTER_API_KEY',
+    // Default settings
+    settings: {
+        apiKey: 'YOUR_OPENROUTER_API_KEY',
+        model: 'openai/gpt-3.5-turbo',
+        systemPrompt: 'Du bist ein erfahrener Physiotherapeut, der professionelle Abschlussberichte verfasst. Deine Berichte sind klar strukturiert, fachlich korrekt und verwenden physiotherapeutische Fachsprache.'
+    },
+    
+    /**
+     * Initialize the service with saved settings if available
+     */
+    init: function() {
+        // Load settings from localStorage if available
+        const savedSettings = localStorage.getItem('adminSettings');
+        if (savedSettings) {
+            this.updateSettings(JSON.parse(savedSettings));
+        }
+    },
+    
+    /**
+     * Update service settings
+     * @param {Object} newSettings - The new settings to apply
+     */
+    updateSettings: function(newSettings) {
+        if (newSettings.apiKey) {
+            this.settings.apiKey = newSettings.apiKey;
+        }
+        
+        if (newSettings.model) {
+            this.settings.model = newSettings.model;
+        }
+        
+        if (newSettings.systemPrompt) {
+            this.settings.systemPrompt = newSettings.systemPrompt;
+        }
+        
+        console.log('OpenRouter service settings updated');
+    },
     
     /**
      * Generate a physiotherapy report based on form data
@@ -20,7 +55,7 @@ const openRouterService = {
         
         try {
             // For demo purposes, if no API key is provided, return a mock response
-            if (this.apiKey === 'YOUR_OPENROUTER_API_KEY') {
+            if (this.settings.apiKey === 'YOUR_OPENROUTER_API_KEY') {
                 console.warn('Using mock response. Replace with actual API key for production.');
                 return this.getMockResponse(formData);
             }
@@ -30,16 +65,16 @@ const openRouterService = {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.apiKey}`,
+                    'Authorization': `Bearer ${this.settings.apiKey}`,
                     'HTTP-Referer': window.location.href,
                     'X-Title': 'Physiotherapie Abschlussbericht Generator'
                 },
                 body: JSON.stringify({
-                    model: 'openai/gpt-3.5-turbo',
+                    model: this.settings.model,
                     messages: [
                         {
                             role: 'system',
-                            content: 'Du bist ein erfahrener Physiotherapeut, der professionelle Abschlussberichte verfasst. Deine Berichte sind klar strukturiert, fachlich korrekt und verwenden physiotherapeutische Fachsprache.'
+                            content: this.settings.systemPrompt
                         },
                         {
                             role: 'user',

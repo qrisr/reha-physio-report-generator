@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize OpenRouter service with saved settings
+    if (typeof openRouterService !== 'undefined' && typeof openRouterService.init === 'function') {
+        openRouterService.init();
+    }
+    
     // DOM Elements
     const currentTimeEl = document.getElementById('current-time');
     const goalStatusEl = document.getElementById('goal-status');
