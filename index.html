@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abschlussbericht erstellen</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <h1>Abschlussbericht erstellen</h1>
+            
+            <form id="report-form" @submit.prevent="submitForm">
+                <div class="form-group">
+                    <label for="time">Zeit:</label>
+                    <input type="text" id="time" v-model="currentTime" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="goal-status">Physiotherapie-Ziel:</label>
+                    <div class="select-with-icon">
+                        <select id="goal-status" v-model="formData.goalStatus" @change="handleGoalStatusChange">
+                            <option value="">Bitte auswählen</option>
+                            <option value="achieved">Ziel erreicht</option>
+                            <option value="not-achieved">Ziel nicht erreicht</option>
+                        </select>
+                        <span class="traffic-light green" v-if="formData.goalStatus === 'achieved'"></span>
+                        <span class="traffic-light red" v-if="formData.goalStatus === 'not-achieved'"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="compliance">Compliance:</label>
+                    <div class="select-with-icon">
+                        <select id="compliance" v-model="formData.compliance">
+                            <option value="">Bitte auswählen</option>
+                            <option value="yes">Ja</option>
+                            <option value="no">Nein</option>
+                        </select>
+                        <span class="traffic-light green" v-if="formData.compliance === 'yes'"></span>
+                        <span class="traffic-light red" v-if="formData.compliance === 'no'"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="goal-text">Text Zieleingabe einfügen:</label>
+                    <textarea id="goal-text" v-model="formData.goalText" placeholder="Patient will wieder Fahrrad fahren"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="hypothesis-text">Text Hypotheseneingabe:</label>
+                    <textarea id="hypothesis-text" v-model="formData.hypothesisText" placeholder="Degenerative Veränderungen im Kniegelenk führten zu Schmerzen und Bewegungseinschränkungen"></textarea>
+                </div>
+                
+                <div class="form-group" v-if="formData.goalStatus === 'not-achieved'">
+                    <label for="reason-text">Begründung für Nicht-Erreichung des Ziels:</label>
+                    <textarea id="reason-text" v-model="formData.reasonText" placeholder="Patient hat zusätzliche Erkrankung, die ihn an der Therapie hindert"></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" @click="resetForm">Formular löschen</button>
+                    <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
+                        Absenden
+                        <span class="loading" v-if="isSubmitting"></span>
+                    </button>
+                </div>
+                
+                <!-- Loading overlay -->
+                <div class="loading-overlay" v-if="isSubmitting">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Bericht wird erstellt...</div>
+                </div>
+            </form>
+            
+            <div class="result-container" v-if="report">
+                <h2>Generierter Abschlussbericht</h2>
+                <div class="report-content" v-html="report"></div>
+            </div>
+            
+            <div class="security-notice">
+                Übermitteln Sie über dieses Formular keine Passwörter. <a href="#">Ein schädliches Formular melden</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <!-- Axios for HTTP requests -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Application Scripts -->
+    <script src="js/services/openRouterService.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
