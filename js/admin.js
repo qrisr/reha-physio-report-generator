@@ -94,13 +94,13 @@ function createAdminModal() {
     const modalContent = document.createElement('div');
     modalContent.className = 'admin-modal-content';
     modalContent.style.backgroundColor = 'white';
-    modalContent.style.margin = '10% auto';
+    modalContent.style.margin = '2% auto';
     modalContent.style.padding = '20px';
     modalContent.style.border = '1px solid #888';
     modalContent.style.borderRadius = '5px';
     modalContent.style.width = '80%';
     modalContent.style.maxWidth = '600px';
-    modalContent.style.maxHeight = '80vh';
+    modalContent.style.maxHeight = '96vh';
     modalContent.style.overflow = 'auto';
     
     // Create modal header
@@ -281,8 +281,16 @@ function createAdminModal() {
     apiKeyInput.style.padding = '8px';
     apiKeyInput.style.boxSizing = 'border-box';
     
+    // Add help text for API key
+    const apiKeyHelp = document.createElement('div');
+    apiKeyHelp.style.fontSize = '0.85em';
+    apiKeyHelp.style.color = '#666';
+    apiKeyHelp.style.marginTop = '5px';
+    apiKeyHelp.innerHTML = 'Geben Sie hier Ihren OpenRouter API-Schlüssel ein. Ohne gültigen API-Schlüssel wird eine Demo-Antwort angezeigt.';
+    
     apiKeyGroup.appendChild(apiKeyLabel);
     apiKeyGroup.appendChild(apiKeyInput);
+    apiKeyGroup.appendChild(apiKeyHelp);
     
     // Status message
     statusMessage = document.createElement('div');
